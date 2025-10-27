@@ -33,7 +33,7 @@ const ActiveTrips = () => {
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
   const [endMileage, setEndMileage] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -119,7 +119,7 @@ const ActiveTrips = () => {
           </div>
           <div className="flex items-center gap-4">
             {profile && <span className="text-sm text-muted-foreground">{profile.full_name}</span>}
-            {profile?.is_admin && (
+            {isAdmin && (
               <Button variant="outline" size="sm" onClick={() => navigate('/admin')}>
                 Admin Dashboard
               </Button>

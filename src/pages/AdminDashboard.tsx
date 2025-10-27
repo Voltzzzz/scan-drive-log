@@ -37,7 +37,7 @@ const AdminDashboard = () => {
     activeTrips: 0,
     totalMileage: 0,
   });
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -46,14 +46,14 @@ const AdminDashboard = () => {
       return;
     }
 
-    if (!profile?.is_admin) {
+    if (!isAdmin) {
       toast.error('Access denied. Admin privileges required.');
       navigate('/');
       return;
     }
 
     fetchTrips();
-  }, [user, profile, navigate]);
+  }, [user, isAdmin, navigate]);
 
   const fetchTrips = async () => {
     setLoading(true);
