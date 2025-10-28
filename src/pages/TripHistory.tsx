@@ -99,10 +99,20 @@ const TripHistory = () => {
 
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle>Histórico de Viagens</CardTitle>
-            <CardDescription>
-              Todas as suas viagens registadas
-            </CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Histórico de Viagens</CardTitle>
+                <CardDescription>
+                  Todas as suas viagens registadas
+                </CardDescription>
+              </div>
+              {profile && (
+                <div className="text-right">
+                  <p className="text-sm text-muted-foreground">Utilizador</p>
+                  <p className="text-lg font-semibold">{profile.full_name}</p>
+                </div>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             {loading ? (
