@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { z } from 'zod';
-import { Car, LogOut } from 'lucide-react';
+import { Car, LogOut, History } from 'lucide-react';
 
 const destinationSchema = z.string().trim().min(3, 'Destination must be at least 3 characters').max(200);
 const mileageSchema = z.coerce.number().int().min(0, 'Mileage must be a positive number').max(999999);
@@ -181,17 +181,29 @@ const StartTrip = () => {
                 />
               </div>
 
-              <div className="flex gap-3">
-                <Button type="submit" className="flex-1" disabled={loading}>
-                  {loading ? 'Starting Trip...' : 'Start Trip'}
+              <div className="flex flex-col gap-3">
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? 'A iniciar viagem...' : 'Iniciar Viagem'}
                 </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => navigate('/trips')}
-                >
-                  View Active Trips
-                </Button>
+                <div className="flex gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => navigate('/trips')}
+                  >
+                    Ver Viagens Ativas
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => navigate('/history')}
+                  >
+                    <History className="mr-2 h-4 w-4" />
+                    Histórico
+                  </Button>
+                </div>
               </div>
             </form>
           </CardContent>

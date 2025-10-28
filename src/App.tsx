@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import StartTrip from "./pages/StartTrip";
 import ActiveTrips from "./pages/ActiveTrips";
 import AdminDashboard from "./pages/AdminDashboard";
+import TripHistory from "./pages/TripHistory";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -22,6 +23,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<StartTrip />} />
             <Route path="/trips" element={<ActiveTrips />} />
+            <Route path="/history" element={<TripHistory />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/auth" element={<Auth />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
