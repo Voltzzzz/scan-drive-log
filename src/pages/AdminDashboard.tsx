@@ -6,7 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import VehicleQRCodesDialog from '@/components/VehicleQRCodesDialog';
+import VehicleManagement from '@/components/VehicleManagement';
+import UserTripsHistory from '@/components/UserTripsHistory';
 import { toast } from 'sonner';
 import { Car, LogOut, TrendingUp, Users, Route, QrCode } from 'lucide-react';
 import { format } from 'date-fns';
@@ -125,101 +128,122 @@ const AdminDashboard = () => {
       </header>
 
       <main className="container mx-auto p-4 py-8">
-        <h2 className="mb-6 text-3xl font-bold">Dashboard Overview</h2>
+        <h2 className="mb-6 text-3xl font-bold">Painel de Administração</h2>
         
-        <div className="mb-8 grid gap-4 md:grid-cols-3">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Total Trips</CardTitle>
-              <Route className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalTrips}</div>
-              <p className="text-xs text-muted-foreground">All time</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Active Trips</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.activeTrips}</div>
-              <p className="text-xs text-muted-foreground">Currently in progress</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Total Mileage</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalMileage.toLocaleString()}</div>
-              <p className="text-xs text-muted-foreground">Kilometers tracked</p>
-            </CardContent>
-          </Card>
-        </div>
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="overview">Resumo</TabsTrigger>
+            <TabsTrigger value="vehicles">Veículos</TabsTrigger>
+            <TabsTrigger value="user-history">Histórico</TabsTrigger>
+            <TabsTrigger value="recent">Viagens Recentes</TabsTrigger>
+          </TabsList>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Trips</CardTitle>
-            <CardDescription>Overview of all fleet vehicle usage</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <div className="text-center text-muted-foreground">Loading trips...</div>
-            ) : trips.length === 0 ? (
-              <div className="text-center text-muted-foreground">No trips recorded yet</div>
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Driver</TableHead>
-                      <TableHead>Vehicle</TableHead>
-                      <TableHead>Destination</TableHead>
-                      <TableHead>Start Time</TableHead>
-                      <TableHead>Distance</TableHead>
-                      <TableHead>Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {trips.map((trip) => (
-                      <TableRow key={trip.id}>
-                        <TableCell className="font-medium">{trip.profiles.full_name}</TableCell>
-                        <TableCell>
-                          <div>
-                            <p className="font-medium">{trip.vehicles.name}</p>
-                            <p className="text-xs text-muted-foreground">{trip.vehicles.license_plate}</p>
-                          </div>
-                        </TableCell>
-                        <TableCell>{trip.destination}</TableCell>
-                        <TableCell className="text-sm">
-                          {format(new Date(trip.start_time), 'MMM d, h:mm a')}
-                        </TableCell>
-                        <TableCell>
-                          {trip.end_mileage 
-                            ? `${(trip.end_mileage - trip.start_mileage).toLocaleString()} km`
-                            : '-'
-                          }
-                        </TableCell>
-                        <TableCell>
-                          {trip.is_active ? (
-                            <Badge className="bg-accent">Active</Badge>
-                          ) : (
-                            <Badge variant="secondary">Completed</Badge>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid gap-4 md:grid-cols-3">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium">Total de Viagens</CardTitle>
+                  <Route className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.totalTrips}</div>
+                  <p className="text-xs text-muted-foreground">Todas as viagens</p>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium">Viagens Ativas</CardTitle>
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.activeTrips}</div>
+                  <p className="text-xs text-muted-foreground">Em curso</p>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium">Quilometragem Total</CardTitle>
+                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.totalMileage.toLocaleString()}</div>
+                  <p className="text-xs text-muted-foreground">Quilómetros registados</p>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="vehicles">
+            <VehicleManagement />
+          </TabsContent>
+
+          <TabsContent value="user-history">
+            <UserTripsHistory />
+          </TabsContent>
+
+          <TabsContent value="recent">
+            <Card>
+              <CardHeader>
+                <CardTitle>Viagens Recentes</CardTitle>
+                <CardDescription>Últimas 50 viagens de todos os veículos</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <div className="text-center text-muted-foreground">A carregar viagens...</div>
+                ) : trips.length === 0 ? (
+                  <div className="text-center text-muted-foreground">Ainda não há viagens registadas</div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Condutor</TableHead>
+                          <TableHead>Veículo</TableHead>
+                          <TableHead>Destino</TableHead>
+                          <TableHead>Início</TableHead>
+                          <TableHead>Distância</TableHead>
+                          <TableHead>Estado</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {trips.map((trip) => (
+                          <TableRow key={trip.id}>
+                            <TableCell className="font-medium">{trip.profiles.full_name}</TableCell>
+                            <TableCell>
+                              <div>
+                                <p className="font-medium">{trip.vehicles.name}</p>
+                                <p className="text-xs text-muted-foreground">{trip.vehicles.license_plate}</p>
+                              </div>
+                            </TableCell>
+                            <TableCell>{trip.destination}</TableCell>
+                            <TableCell className="text-sm">
+                              {format(new Date(trip.start_time), 'dd/MM/yyyy HH:mm')}
+                            </TableCell>
+                            <TableCell>
+                              {trip.end_mileage 
+                                ? `${(trip.end_mileage - trip.start_mileage).toLocaleString()} km`
+                                : '-'
+                              }
+                            </TableCell>
+                            <TableCell>
+                              {trip.is_active ? (
+                                <Badge>Ativa</Badge>
+                              ) : (
+                                <Badge variant="secondary">Concluída</Badge>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </main>
 
       <VehicleQRCodesDialog open={qrDialogOpen} onOpenChange={setQrDialogOpen} />
