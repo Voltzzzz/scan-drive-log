@@ -43,7 +43,10 @@ export type Database = {
           end_time: string | null
           id: string
           is_active: boolean | null
+          parking_floor: number | null
+          parking_spot: string | null
           purpose: string | null
+          range_remaining: number | null
           start_mileage: number
           start_time: string
           updated_at: string
@@ -57,7 +60,10 @@ export type Database = {
           end_time?: string | null
           id?: string
           is_active?: boolean | null
+          parking_floor?: number | null
+          parking_spot?: string | null
           purpose?: string | null
+          range_remaining?: number | null
           start_mileage: number
           start_time?: string
           updated_at?: string
@@ -71,7 +77,10 @@ export type Database = {
           end_time?: string | null
           id?: string
           is_active?: boolean | null
+          parking_floor?: number | null
+          parking_spot?: string | null
           purpose?: string | null
+          range_remaining?: number | null
           start_mileage?: number
           start_time?: string
           updated_at?: string

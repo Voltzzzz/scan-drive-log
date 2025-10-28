@@ -14,6 +14,8 @@ import { Car, LogOut, Clock, MapPin } from 'lucide-react';
 import { format } from 'date-fns';
 
 const mileageSchema = z.coerce.number().int().min(0, 'Mileage must be a positive number').max(999999);
+const rangeSchema = z.coerce.number().int().min(0, 'Range must be a positive number').max(999999);
+const parkingFloorSchema = z.coerce.number().int().min(0).max(7, 'Floor must be between 0 and 7');
 
 interface Trip {
   id: string;
@@ -32,6 +34,9 @@ const ActiveTrips = () => {
   const [loading, setLoading] = useState(true);
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
   const [endMileage, setEndMileage] = useState('');
+  const [rangeRemaining, setRangeRemaining] = useState('');
+  const [parkingFloor, setParkingFloor] = useState('');
+  const [parkingSpot, setParkingSpot] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const { user, profile, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
@@ -76,6 +81,8 @@ const ActiveTrips = () => {
     setSubmitting(true);
     try {
       mileageSchema.parse(endMileage);
+      rangeSchema.parse(rangeRemaining);
+      parkingFloorSchema.parse(parkingFloor);
       
       const endMileageNum = parseInt(endMileage);
       if (endMileageNum < selectedTrip.start_mileage) {
@@ -89,6 +96,9 @@ const ActiveTrips = () => {
           end_mileage: endMileageNum,
           end_time: new Date().toISOString(),
           is_active: false,
+          range_remaining: parseInt(rangeRemaining),
+          parking_floor: parseInt(parkingFloor),
+          parking_spot: parkingSpot,
         })
         .eq('id', selectedTrip.id);
 
@@ -98,6 +108,9 @@ const ActiveTrips = () => {
         toast.success('Trip ended successfully!');
         setSelectedTrip(null);
         setEndMileage('');
+        setRangeRemaining('');
+        setParkingFloor('');
+        setParkingSpot('');
         fetchActiveTrips();
       }
     } catch (err) {
@@ -194,9 +207,9 @@ const ActiveTrips = () => {
       <Dialog open={!!selectedTrip} onOpenChange={(open) => !open && setSelectedTrip(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>End Trip</DialogTitle>
+            <DialogTitle>Terminar Viagem</DialogTitle>
             <DialogDescription>
-              Enter the ending mileage to complete this trip
+              Preencha os dados para terminar esta viagem
             </DialogDescription>
           </DialogHeader>
           {selectedTrip && (
@@ -207,32 +220,70 @@ const ActiveTrips = () => {
                 <p className="mt-2 text-sm">Starting mileage: {selectedTrip.start_mileage.toLocaleString()} km</p>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="end_mileage">Ending Mileage</Label>
+                <Label htmlFor="end_mileage">Quilometragem Final</Label>
                 <Input
                   id="end_mileage"
                   type="number"
-                  placeholder="Enter current mileage"
+                  placeholder="Quilometragem atual"
                   value={endMileage}
                   onChange={(e) => setEndMileage(e.target.value)}
                   min={selectedTrip.start_mileage}
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="range_remaining">Autonomia Restante (km)</Label>
+                <Input
+                  id="range_remaining"
+                  type="number"
+                  placeholder="Km de autonomia"
+                  value={rangeRemaining}
+                  onChange={(e) => setRangeRemaining(e.target.value)}
+                  min={0}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="parking_floor">Piso (0-7)</Label>
+                  <Input
+                    id="parking_floor"
+                    type="number"
+                    placeholder="Piso"
+                    value={parkingFloor}
+                    onChange={(e) => setParkingFloor(e.target.value)}
+                    min={0}
+                    max={7}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="parking_spot">Lugar</Label>
+                  <Input
+                    id="parking_spot"
+                    type="text"
+                    placeholder="Número do lugar"
+                    value={parkingSpot}
+                    onChange={(e) => setParkingSpot(e.target.value)}
+                  />
+                </div>
+              </div>
               <div className="flex gap-3">
                 <Button
                   onClick={handleEndTrip}
-                  disabled={!endMileage || submitting}
+                  disabled={!endMileage || !rangeRemaining || !parkingFloor || submitting}
                   className="flex-1"
                 >
-                  {submitting ? 'Ending Trip...' : 'End Trip'}
+                  {submitting ? 'A terminar viagem...' : 'Terminar Viagem'}
                 </Button>
                 <Button
                   variant="outline"
                   onClick={() => {
                     setSelectedTrip(null);
                     setEndMileage('');
+                    setRangeRemaining('');
+                    setParkingFloor('');
+                    setParkingSpot('');
                   }}
                 >
-                  Cancel
+                  Cancelar
                 </Button>
               </div>
             </div>
