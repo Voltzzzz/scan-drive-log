@@ -17,11 +17,13 @@ const mileageSchema = z.coerce.number().int().min(0, 'Mileage must be a positive
 
 const StartTrip = () => {
   const [loading, setLoading] = useState(false);
-  const [vehicles, setVehicles] = useState<Array<{ id: string; name: string; license_plate: string }>>([]);
+  const [vehicles, setVehicles] = useState<Array<{ id: string; name: string; license_plate: string; range_remaining: number | null }>>([]);
   const [selectedVehicle, setSelectedVehicle] = useState<string>('');
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  
+  const selectedVehicleData = vehicles.find(v => v.id === selectedVehicle);
 
   useEffect(() => {
     if (!user) {
@@ -55,7 +57,25 @@ const StartTrip = () => {
       .order('name');
     
     if (data) {
-      setVehicles(data);
+      // Fetch range_remaining for each vehicle from latest active trip
+      const vehiclesWithRange = await Promise.all(
+        data.map(async (vehicle) => {
+          const { data: tripData } = await supabase
+            .from('trips')
+            .select('range_remaining')
+            .eq('vehicle_id', vehicle.id)
+            .order('start_time', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          
+          return {
+            ...vehicle,
+            range_remaining: tripData?.range_remaining || null,
+          };
+        })
+      );
+      
+      setVehicles(vehiclesWithRange);
     }
   };
 
@@ -141,10 +161,18 @@ const StartTrip = () => {
                     {vehicles.map((vehicle) => (
                       <SelectItem key={vehicle.id} value={vehicle.id}>
                         {vehicle.name} ({vehicle.license_plate})
+                        {vehicle.range_remaining && vehicle.range_remaining < 50 && (
+                          <span className="ml-2 text-xs text-destructive">⚠️ Bateria baixa ({vehicle.range_remaining}km)</span>
+                        )}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {selectedVehicleData?.range_remaining && selectedVehicleData.range_remaining < 50 && (
+                  <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+                    ⚠️ <strong>Aviso:</strong> Este veículo tem apenas {selectedVehicleData.range_remaining}km de autonomia restante. Considere carregar antes de iniciar a viagem.
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">

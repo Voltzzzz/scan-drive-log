@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { toast } from 'sonner';
-import { Plus, Edit, Car } from 'lucide-react';
+import { Plus, Edit, Car, Trash2 } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 interface Vehicle {
   id: string;
@@ -98,6 +99,20 @@ const VehicleManagement = () => {
       qr_code: vehicle.qr_code,
     });
     setDialogOpen(true);
+  };
+
+  const handleDelete = async (vehicleId: string) => {
+    const { error } = await supabase
+      .from('vehicles')
+      .delete()
+      .eq('id', vehicleId);
+
+    if (error) {
+      toast.error('Erro ao eliminar veículo');
+    } else {
+      toast.success('Veículo eliminado com sucesso');
+      fetchVehicles();
+    }
   };
 
   return (
@@ -199,14 +214,41 @@ const VehicleManagement = () => {
                     <code className="rounded bg-muted px-2 py-1 text-sm">{vehicle.qr_code}</code>
                   </TableCell>
                   <TableCell>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleEdit(vehicle)}
-                    >
-                      <Edit className="mr-2 h-3 w-3" />
-                      Editar
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleEdit(vehicle)}
+                      >
+                        <Edit className="mr-2 h-3 w-3" />
+                        Editar
+                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                          >
+                            <Trash2 className="mr-2 h-3 w-3" />
+                            Eliminar
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Tem a certeza?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Esta ação não pode ser revertida. O veículo será eliminado permanentemente.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleDelete(vehicle.id)}>
+                              Eliminar
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

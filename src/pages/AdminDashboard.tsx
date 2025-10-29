@@ -60,7 +60,14 @@ const AdminDashboard = () => {
 
   const fetchTrips = async () => {
     setLoading(true);
-    const { data } = await supabase
+    
+    // Fetch all trips for accurate stats
+    const { data: allTrips } = await supabase
+      .from('trips')
+      .select('id, end_mileage, start_mileage, is_active');
+    
+    // Fetch recent trips with details
+    const { data: recentTrips } = await supabase
       .from('trips')
       .select(`
         id,
@@ -81,12 +88,14 @@ const AdminDashboard = () => {
       .order('start_time', { ascending: false })
       .limit(50);
     
-    if (data) {
-      setTrips(data as any);
-      
-      // Calculate stats
-      const activeTrips = data.filter(t => t.is_active).length;
-      const totalMileage = data.reduce((sum, trip) => {
+    if (recentTrips) {
+      setTrips(recentTrips as any);
+    }
+    
+    if (allTrips) {
+      // Calculate stats from all trips
+      const activeTrips = allTrips.filter(t => t.is_active).length;
+      const totalMileage = allTrips.reduce((sum, trip) => {
         if (trip.end_mileage) {
           return sum + (trip.end_mileage - trip.start_mileage);
         }
@@ -94,11 +103,12 @@ const AdminDashboard = () => {
       }, 0);
       
       setStats({
-        totalTrips: data.length,
+        totalTrips: allTrips.length,
         activeTrips,
         totalMileage,
       });
     }
+    
     setLoading(false);
   };
 
