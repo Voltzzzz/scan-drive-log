@@ -70,11 +70,17 @@ const AdminDashboard = () => {
     const { data: recentTrips, error: tripsError } = await supabase
       .from('trips')
       .select(`
-        *,
-        profiles!inner (
+        id,
+        destination,
+        start_mileage,
+        end_mileage,
+        start_time,
+        end_time,
+        is_active,
+        profiles (
           full_name
         ),
-        vehicles!inner (
+        vehicles (
           name,
           license_plate
         )
@@ -84,6 +90,7 @@ const AdminDashboard = () => {
     
     if (tripsError) {
       console.error('Error fetching trips:', tripsError);
+      toast.error('Erro ao carregar viagens recentes');
     }
     
     if (recentTrips) {
