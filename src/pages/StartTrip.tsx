@@ -161,14 +161,14 @@ const StartTrip = () => {
                     {vehicles.map((vehicle) => (
                       <SelectItem key={vehicle.id} value={vehicle.id}>
                         {vehicle.name} ({vehicle.license_plate})
-                        {vehicle.range_remaining && vehicle.range_remaining < 50 && (
+                        {vehicle.range_remaining && vehicle.range_remaining < 130 && (
                           <span className="ml-2 text-xs text-destructive">⚠️ Bateria baixa ({vehicle.range_remaining}km)</span>
                         )}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                {selectedVehicleData?.range_remaining && selectedVehicleData.range_remaining < 50 && (
+                {selectedVehicleData?.range_remaining && selectedVehicleData.range_remaining < 130 && (
                   <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
                     ⚠️ <strong>Aviso:</strong> Este veículo tem apenas {selectedVehicleData.range_remaining}km de autonomia restante. Considere carregar antes de iniciar a viagem.
                   </div>

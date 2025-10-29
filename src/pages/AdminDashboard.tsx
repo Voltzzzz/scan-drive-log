@@ -67,26 +67,24 @@ const AdminDashboard = () => {
       .select('id, end_mileage, start_mileage, is_active');
     
     // Fetch recent trips with details
-    const { data: recentTrips } = await supabase
+    const { data: recentTrips, error: tripsError } = await supabase
       .from('trips')
       .select(`
-        id,
-        destination,
-        start_mileage,
-        end_mileage,
-        start_time,
-        end_time,
-        is_active,
-        profiles (
+        *,
+        profiles!inner (
           full_name
         ),
-        vehicles (
+        vehicles!inner (
           name,
           license_plate
         )
       `)
       .order('start_time', { ascending: false })
       .limit(50);
+    
+    if (tripsError) {
+      console.error('Error fetching trips:', tripsError);
+    }
     
     if (recentTrips) {
       setTrips(recentTrips as any);
