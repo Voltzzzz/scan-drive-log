@@ -125,6 +125,125 @@ export type Database = {
         }
         Relationships: []
       }
+      vehicle_observations: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          is_resolved: boolean
+          observation_type: Database["public"]["Enums"]["observation_type"]
+          resolved_at: string | null
+          resolved_by: string | null
+          trip_id: string | null
+          user_id: string
+          vehicle_id: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          is_resolved?: boolean
+          observation_type: Database["public"]["Enums"]["observation_type"]
+          resolved_at?: string | null
+          resolved_by?: string | null
+          trip_id?: string | null
+          user_id: string
+          vehicle_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          is_resolved?: boolean
+          observation_type?: Database["public"]["Enums"]["observation_type"]
+          resolved_at?: string | null
+          resolved_by?: string | null
+          trip_id?: string | null
+          user_id?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_observations_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_observations_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_observations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_observations_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vehicle_reservations: {
+        Row: {
+          created_at: string
+          end_time: string
+          id: string
+          notes: string | null
+          start_time: string
+          status: Database["public"]["Enums"]["reservation_status"]
+          updated_at: string
+          user_id: string
+          vehicle_id: string
+        }
+        Insert: {
+          created_at?: string
+          end_time: string
+          id?: string
+          notes?: string | null
+          start_time: string
+          status?: Database["public"]["Enums"]["reservation_status"]
+          updated_at?: string
+          user_id: string
+          vehicle_id: string
+        }
+        Update: {
+          created_at?: string
+          end_time?: string
+          id?: string
+          notes?: string | null
+          start_time?: string
+          status?: Database["public"]["Enums"]["reservation_status"]
+          updated_at?: string
+          user_id?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_reservations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_reservations_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vehicles: {
         Row: {
           created_at: string
@@ -164,6 +283,8 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      observation_type: "issue" | "note" | "maintenance"
+      reservation_status: "pending" | "active" | "completed" | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -292,6 +413,8 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      observation_type: ["issue", "note", "maintenance"],
+      reservation_status: ["pending", "active", "completed", "cancelled"],
     },
   },
 } as const

@@ -146,9 +146,10 @@ const AdminDashboard = () => {
         <h2 className="mb-6 text-3xl font-bold">Painel de Administração</h2>
         
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview">Resumo</TabsTrigger>
             <TabsTrigger value="vehicles">Veículos</TabsTrigger>
+            <TabsTrigger value="analytics">Análises</TabsTrigger>
             <TabsTrigger value="user-history">Histórico</TabsTrigger>
             <TabsTrigger value="recent">Viagens Recentes</TabsTrigger>
           </TabsList>
@@ -192,6 +193,50 @@ const AdminDashboard = () => {
 
           <TabsContent value="vehicles">
             <VehicleManagement />
+          </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/rankings')}>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5" />
+                    Rankings de Utilizadores
+                  </CardTitle>
+                  <CardDescription>Ver top condutores por quilómetros percorridos</CardDescription>
+                </CardHeader>
+              </Card>
+              
+              <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/vehicle-stats')}>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Car className="h-5 w-5" />
+                    Estatísticas de Veículos
+                  </CardTitle>
+                  <CardDescription>Utilização e performance de cada veículo</CardDescription>
+                </CardHeader>
+              </Card>
+              
+              <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/reservations')}>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Route className="h-5 w-5" />
+                    Reservas de Veículos
+                  </CardTitle>
+                  <CardDescription>Gerir reservas e disponibilidade</CardDescription>
+                </CardHeader>
+              </Card>
+              
+              <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/observations')}>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Users className="h-5 w-5" />
+                    Observações de Veículos
+                  </CardTitle>
+                  <CardDescription>Ver problemas e observações reportadas</CardDescription>
+                </CardHeader>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="user-history">

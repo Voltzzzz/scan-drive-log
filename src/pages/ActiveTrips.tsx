@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import AddObservationDialog from '@/components/AddObservationDialog';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { Car, LogOut, Clock, MapPin } from 'lucide-react';
@@ -24,6 +25,7 @@ interface Trip {
   start_mileage: number;
   start_time: string;
   vehicles: {
+    id: string;
     name: string;
     license_plate: string;
   };
@@ -61,6 +63,7 @@ const ActiveTrips = () => {
         start_mileage,
         start_time,
         vehicles (
+          id,
           name,
           license_plate
         )
@@ -254,18 +257,22 @@ const ActiveTrips = () => {
                     max={7}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="parking_spot">Lugar</Label>
-                  <Input
-                    id="parking_spot"
-                    type="text"
-                    placeholder="Número do lugar"
-                    value={parkingSpot}
-                    onChange={(e) => setParkingSpot(e.target.value)}
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="parking_spot">Lugar</Label>
+                <Input
+                  id="parking_spot"
+                  type="text"
+                  placeholder="Número do lugar"
+                  value={parkingSpot}
+                  onChange={(e) => setParkingSpot(e.target.value)}
+                />
               </div>
-              <div className="flex gap-3">
+            </div>
+            <AddObservationDialog 
+              vehicleId={selectedTrip.vehicles.id} 
+              tripId={selectedTrip.id} 
+            />
+            <div className="flex gap-3">
                 <Button
                   onClick={handleEndTrip}
                   disabled={!endMileage || !rangeRemaining || !parkingFloor || submitting}

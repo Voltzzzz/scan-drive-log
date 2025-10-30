@@ -8,9 +8,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
 import { z } from 'zod';
-import { Car, LogOut, History } from 'lucide-react';
+import { Car, LogOut, History, Menu, Calendar, TrendingUp, FileText } from 'lucide-react';
 
 const destinationSchema = z.string().trim().min(3, 'Destination must be at least 3 characters').max(200);
 const mileageSchema = z.coerce.number().int().min(0, 'Mileage must be a positive number').max(999999);
@@ -133,6 +134,38 @@ const StartTrip = () => {
           </div>
           <div className="flex items-center gap-4">
             {profile && <span className="text-sm text-muted-foreground">{profile.full_name}</span>}
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Menu className="mr-2 h-4 w-4" />
+                  Menu
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={() => navigate('/trips')}>
+                  <Car className="mr-2 h-4 w-4" />
+                  Viagens Ativas
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/history')}>
+                  <History className="mr-2 h-4 w-4" />
+                  Histórico
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/reservations')}>
+                  <Calendar className="mr-2 h-4 w-4" />
+                  Reservas
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/rankings')}>
+                  <TrendingUp className="mr-2 h-4 w-4" />
+                  Rankings
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/observations')}>
+                  <FileText className="mr-2 h-4 w-4" />
+                  Observações
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            
             <Button variant="outline" size="sm" onClick={signOut}>
               <LogOut className="mr-2 h-4 w-4" />
               Sign Out
