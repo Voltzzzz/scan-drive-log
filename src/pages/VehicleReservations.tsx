@@ -10,10 +10,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft, Calendar, Clock, Plus } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ArrowLeft, Calendar as CalendarIcon, Clock, Plus, Play, X } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { format, isSameDay, startOfDay } from "date-fns";
+import { pt } from "date-fns/locale";
 
 interface Vehicle {
   id: string;
@@ -42,6 +45,10 @@ export default function VehicleReservations() {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
+  const [isStartTripDialogOpen, setIsStartTripDialogOpen] = useState(false);
+  const [startMileage, setStartMileage] = useState("");
   
   // Form state
   const [selectedVehicle, setSelectedVehicle] = useState("");
@@ -177,6 +184,54 @@ export default function VehicleReservations() {
     }
   };
 
+  const startTripFromReservation = async () => {
+    if (!selectedReservation || !startMileage) {
+      toast.error("Preencha a quilometragem inicial");
+      return;
+    }
+
+    try {
+      // Create trip
+      const { error: tripError } = await supabase.from("trips").insert({
+        user_id: user!.id,
+        vehicle_id: selectedReservation.vehicle_id,
+        start_mileage: parseInt(startMileage),
+        destination: selectedReservation.notes || "Reserva",
+        start_time: new Date().toISOString(),
+      });
+
+      if (tripError) throw tripError;
+
+      // Update reservation status
+      const { error: updateError } = await supabase
+        .from("vehicle_reservations")
+        .update({ status: "active" })
+        .eq("id", selectedReservation.id);
+
+      if (updateError) throw updateError;
+
+      toast.success("Viagem iniciada com sucesso");
+      setIsStartTripDialogOpen(false);
+      setSelectedReservation(null);
+      setStartMileage("");
+      fetchData();
+      navigate("/active-trips");
+    } catch (error) {
+      console.error("Error starting trip:", error);
+      toast.error("Erro ao iniciar viagem");
+    }
+  };
+
+  const filteredReservations = selectedDate
+    ? reservations.filter((r) =>
+        isSameDay(new Date(r.start_time), selectedDate)
+      )
+    : reservations;
+
+  const reservationDates = reservations.map((r) =>
+    startOfDay(new Date(r.start_time))
+  );
+
   const getStatusBadge = (status: string) => {
     const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
       pending: "secondary",
@@ -198,7 +253,7 @@ export default function VehicleReservations() {
   return (
     <div className="min-h-screen bg-background p-4">
       <div className="max-w-6xl mx-auto space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-4">
           <Button
             variant="outline"
             onClick={() => navigate(-1)}
@@ -302,81 +357,169 @@ export default function VehicleReservations() {
           </Dialog>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              Minhas Reservas
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <p className="text-center text-muted-foreground">A carregar...</p>
-            ) : reservations.length === 0 ? (
-              <p className="text-center text-muted-foreground">
-                Ainda não tem reservas
-              </p>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Veículo</TableHead>
-                    <TableHead>Início</TableHead>
-                    <TableHead>Fim</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead>Observações</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {reservations.map((reservation) => (
-                    <TableRow key={reservation.id}>
-                      <TableCell>
-                        <div>
-                          <p className="font-medium">{reservation.vehicles.name}</p>
+        <div className="grid md:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CalendarIcon className="h-5 w-5" />
+                Calendário de Reservas
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex justify-center">
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={setSelectedDate}
+                locale={pt}
+                modifiers={{
+                  reserved: reservationDates,
+                }}
+                modifiersStyles={{
+                  reserved: {
+                    fontWeight: "bold",
+                    textDecoration: "underline",
+                  },
+                }}
+                className="rounded-md border"
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CalendarIcon className="h-5 w-5" />
+                {selectedDate
+                  ? `Reservas - ${format(selectedDate, "dd/MM/yyyy", { locale: pt })}`
+                  : "Todas as Reservas"}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <p className="text-center text-muted-foreground">A carregar...</p>
+              ) : filteredReservations.length === 0 ? (
+                <p className="text-center text-muted-foreground">
+                  {selectedDate
+                    ? "Sem reservas neste dia"
+                    : "Ainda não tem reservas"}
+                </p>
+              ) : (
+              <div className="space-y-4">
+                  {filteredReservations.map((reservation) => (
+                    <Card key={reservation.id} className="p-4">
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-lg">
+                            {reservation.vehicles.name}
+                          </h3>
                           <p className="text-sm text-muted-foreground">
                             {reservation.vehicles.license_plate}
                           </p>
                         </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
+                        {getStatusBadge(reservation.status)}
+                      </div>
+                      
+                      <div className="space-y-2 mb-4">
+                        <div className="flex items-center gap-2 text-sm">
                           <Clock className="h-4 w-4 text-muted-foreground" />
-                          <span>
+                          <span className="text-muted-foreground">Início:</span>
+                          <span className="font-medium">
                             {format(new Date(reservation.start_time), "dd/MM/yyyy HH:mm")}
                           </span>
                         </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 text-sm">
                           <Clock className="h-4 w-4 text-muted-foreground" />
-                          <span>
+                          <span className="text-muted-foreground">Fim:</span>
+                          <span className="font-medium">
                             {format(new Date(reservation.end_time), "dd/MM/yyyy HH:mm")}
                           </span>
                         </div>
-                      </TableCell>
-                      <TableCell>{getStatusBadge(reservation.status)}</TableCell>
-                      <TableCell className="max-w-xs truncate">
-                        {reservation.notes || "-"}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {reservation.status === "pending" && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => cancelReservation(reservation.id)}
-                          >
-                            Cancelar
-                          </Button>
+                        {reservation.notes && (
+                          <p className="text-sm text-muted-foreground mt-2">
+                            <strong>Observações:</strong> {reservation.notes}
+                          </p>
                         )}
-                      </TableCell>
-                    </TableRow>
+                      </div>
+
+                      <div className="flex gap-2 flex-wrap">
+                        {reservation.status === "pending" && (
+                          <>
+                            <Button
+                              variant="default"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedReservation(reservation);
+                                setIsStartTripDialogOpen(true);
+                              }}
+                              className="gap-2 flex-1"
+                            >
+                              <Play className="h-4 w-4" />
+                              Iniciar Viagem
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => cancelReservation(reservation.id)}
+                              className="gap-2"
+                            >
+                              <X className="h-4 w-4" />
+                              Cancelar
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </Card>
                   ))}
-                </TableBody>
-              </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        <Dialog open={isStartTripDialogOpen} onOpenChange={setIsStartTripDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Iniciar Viagem</DialogTitle>
+            </DialogHeader>
+            {selectedReservation && (
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Veículo</p>
+                  <p className="font-medium">
+                    {selectedReservation.vehicles.name} -{" "}
+                    {selectedReservation.vehicles.license_plate}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="start-mileage">Quilometragem Inicial</Label>
+                  <Input
+                    id="start-mileage"
+                    type="number"
+                    placeholder="Ex: 15000"
+                    value={startMileage}
+                    onChange={(e) => setStartMileage(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
             )}
-          </CardContent>
-        </Card>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsStartTripDialogOpen(false);
+                  setSelectedReservation(null);
+                  setStartMileage("");
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button onClick={startTripFromReservation}>
+                Iniciar Viagem
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
