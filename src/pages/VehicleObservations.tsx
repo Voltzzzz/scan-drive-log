@@ -69,11 +69,11 @@ export default function VehicleObservations() {
   const getTypeIcon = (type: string) => {
     switch (type) {
       case "issue":
-        return <AlertCircle className="h-4 w-4 text-destructive" />;
+        return <AlertCircle className="h-4 w-4" />;
       case "maintenance":
-        return <Wrench className="h-4 w-4 text-warning" />;
+        return <Wrench className="h-4 w-4" />;
       case "note":
-        return <FileText className="h-4 w-4 text-muted-foreground" />;
+        return <FileText className="h-4 w-4" />;
       default:
         return null;
     }
@@ -191,7 +191,7 @@ export default function VehicleObservations() {
                       <TableCell>{obs.profiles.full_name}</TableCell>
                       <TableCell>
                         {obs.is_resolved ? (
-                          <div className="flex items-center gap-2 text-green-600">
+                          <div className="flex items-center gap-2 text-success">
                             <CheckCircle className="h-4 w-4" />
                             <span>Resolvida</span>
                           </div>

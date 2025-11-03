@@ -242,6 +242,7 @@ export default function VehicleReservations() {
                     <Input
                       id="start-date"
                       type="date"
+                      min={new Date().toISOString().split('T')[0]}
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
                       required
@@ -265,6 +266,7 @@ export default function VehicleReservations() {
                     <Input
                       id="end-date"
                       type="date"
+                      min={startDate || new Date().toISOString().split('T')[0]}
                       value={endDate}
                       onChange={(e) => setEndDate(e.target.value)}
                       required

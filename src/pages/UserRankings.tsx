@@ -78,10 +78,10 @@ export default function UserRankings() {
   };
 
   const getMedalIcon = (position: number) => {
-    if (position === 1) return <Trophy className="h-6 w-6 text-yellow-500" />;
-    if (position === 2) return <Medal className="h-6 w-6 text-gray-400" />;
-    if (position === 3) return <Medal className="h-6 w-6 text-orange-600" />;
-    return <span className="text-muted-foreground">#{position}</span>;
+    if (position === 1) return <Trophy className="h-6 w-6 text-warning" />;
+    if (position === 2) return <Medal className="h-6 w-6 text-muted-foreground" />;
+    if (position === 3) return <Medal className="h-6 w-6 text-destructive" />;
+    return <span className="text-muted-foreground font-semibold">#{position}</span>;
   };
 
   return (

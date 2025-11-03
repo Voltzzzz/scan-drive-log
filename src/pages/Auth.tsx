@@ -99,16 +99,18 @@ const Auth = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary">
-            <Car className="h-6 w-6 text-primary-foreground" />
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4">
+      <Card className="w-full max-w-md shadow-xl border-0">
+        <CardHeader className="text-center space-y-4">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-lg">
+            <Car className="h-8 w-8 text-primary-foreground" />
           </div>
-          <CardTitle className="text-2xl">Fleet Vehicle Tracker</CardTitle>
-          <CardDescription>
-            Sign in or create an account to manage vehicle usage
-          </CardDescription>
+          <div>
+            <CardTitle className="text-3xl mb-2">Fleet Tracker</CardTitle>
+            <CardDescription className="text-base">
+              Gerencie a frota de veículos da sua empresa
+            </CardDescription>
+          </div>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="login" className="w-full">
