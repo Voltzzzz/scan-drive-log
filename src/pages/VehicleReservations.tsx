@@ -215,7 +215,7 @@ export default function VehicleReservations() {
       setSelectedReservation(null);
       setStartMileage("");
       fetchData();
-      navigate("/active-trips");
+      navigate("/trips");
     } catch (error) {
       console.error("Error starting trip:", error);
       toast.error("Erro ao iniciar viagem");
