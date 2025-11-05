@@ -7,12 +7,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import { OnboardingTour } from '@/components/OnboardingTour';
 import VehicleQRCodesDialog from '@/components/VehicleQRCodesDialog';
 import VehicleManagement from '@/components/VehicleManagement';
 import UserTripsHistory from '@/components/UserTripsHistory';
 import { toast } from 'sonner';
-import { Car, LogOut, TrendingUp, Users, Route, QrCode } from 'lucide-react';
+import { Car, LogOut, TrendingUp, Users, Route, QrCode, BookOpen } from 'lucide-react';
 import { format } from 'date-fns';
+import { Step } from 'react-joyride';
 
 interface TripData {
   id: string;
@@ -35,6 +38,7 @@ const AdminDashboard = () => {
   const [trips, setTrips] = useState<TripData[]>([]);
   const [loading, setLoading] = useState(true);
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
+  const [runTour, setRunTour] = useState(false);
   const [stats, setStats] = useState({
     totalTrips: 0,
     activeTrips: 0,
@@ -42,6 +46,26 @@ const AdminDashboard = () => {
   });
   const { user, profile, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
+
+  const adminTourSteps: Step[] = [
+    {
+      target: 'body',
+      content: 'Bem-vindo ao Painel de Administração! Como admin, tens acesso a funcionalidades especiais 👨‍💼',
+      placement: 'center',
+    },
+    {
+      target: '[role="tablist"]',
+      content: 'Explora as diferentes secções: Resumo, Veículos, Análises, Histórico e Viagens Recentes',
+    },
+    {
+      target: '.qr-button',
+      content: 'Gera códigos QR para facilitar o check-in dos veículos',
+    },
+    {
+      target: '[data-state="active"]',
+      content: 'Aqui tens estatísticas importantes sobre a frota e utilização',
+    },
+  ];
 
   useEffect(() => {
     if (!user) {
@@ -56,6 +80,12 @@ const AdminDashboard = () => {
     }
 
     fetchTrips();
+
+    // Check if admin needs onboarding tour (first time in admin panel)
+    const hasSeenAdminTour = localStorage.getItem('hasSeenAdminTour');
+    if (!hasSeenAdminTour) {
+      setTimeout(() => setRunTour(true), 1000);
+    }
   }, [user, isAdmin, navigate]);
 
   const fetchTrips = async () => {
@@ -117,6 +147,15 @@ const AdminDashboard = () => {
     setLoading(false);
   };
 
+  const handleTourFinish = () => {
+    setRunTour(false);
+    localStorage.setItem('hasSeenAdminTour', 'true');
+  };
+
+  const restartTour = () => {
+    setRunTour(true);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card">
@@ -127,13 +166,18 @@ const AdminDashboard = () => {
           </div>
           <div className="flex items-center gap-4">
             {profile && <span className="text-sm text-muted-foreground">{profile.full_name}</span>}
-            <Button variant="outline" size="sm" onClick={() => setQrDialogOpen(true)}>
+            <Button variant="outline" size="sm" onClick={restartTour}>
+              <BookOpen className="mr-2 h-4 w-4" />
+              Tour
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setQrDialogOpen(true)} className="qr-button">
               <QrCode className="mr-2 h-4 w-4" />
               View QR Codes
             </Button>
             <Button variant="outline" size="sm" onClick={() => navigate('/')}>
               Back to App
             </Button>
+            <ThemeToggle />
             <Button variant="outline" size="sm" onClick={signOut}>
               <LogOut className="mr-2 h-4 w-4" />
               Sign Out
@@ -307,6 +351,7 @@ const AdminDashboard = () => {
       </main>
 
       <VehicleQRCodesDialog open={qrDialogOpen} onOpenChange={setQrDialogOpen} />
+      <OnboardingTour run={runTour} steps={adminTourSteps} onFinish={handleTourFinish} />
     </div>
   );
 };

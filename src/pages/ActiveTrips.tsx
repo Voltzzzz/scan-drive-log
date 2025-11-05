@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import AddObservationDialog from '@/components/AddObservationDialog';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -140,6 +141,7 @@ const ActiveTrips = () => {
                 Admin Dashboard
               </Button>
             )}
+            <ThemeToggle />
             <Button variant="outline" size="sm" onClick={signOut}>
               <LogOut className="mr-2 h-4 w-4" />
               Sign Out

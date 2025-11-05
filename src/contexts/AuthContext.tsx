@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 interface AuthContextType {
   user: User | null;
   session: Session | null;
-  profile: { full_name: string } | null;
+  profile: { full_name: string; has_completed_tour: boolean } | null;
   isAdmin: boolean;
   loading: boolean;
   signOut: () => Promise<void>;
@@ -17,7 +17,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<{ full_name: string } | null>(null);
+  const [profile, setProfile] = useState<{ full_name: string; has_completed_tour: boolean } | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -58,7 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Fetch profile
     const { data: profileData } = await supabase
       .from('profiles')
-      .select('full_name')
+      .select('full_name, has_completed_tour')
       .eq('id', userId)
       .single();
     

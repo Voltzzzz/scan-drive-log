@@ -9,9 +9,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import { OnboardingTour } from '@/components/OnboardingTour';
 import { toast } from 'sonner';
 import { z } from 'zod';
-import { Car, LogOut, History, Menu, Calendar, TrendingUp, FileText } from 'lucide-react';
+import { Car, LogOut, History, Menu, Calendar, TrendingUp, FileText, BookOpen } from 'lucide-react';
+import { Step } from 'react-joyride';
 
 const destinationSchema = z.string().trim().min(3, 'Destination must be at least 3 characters').max(200);
 const mileageSchema = z.coerce.number().int().min(0, 'Mileage must be a positive number').max(999999);
@@ -20,11 +23,40 @@ const StartTrip = () => {
   const [loading, setLoading] = useState(false);
   const [vehicles, setVehicles] = useState<Array<{ id: string; name: string; license_plate: string; range_remaining: number | null }>>([]);
   const [selectedVehicle, setSelectedVehicle] = useState<string>('');
+  const [runTour, setRunTour] = useState(false);
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   
   const selectedVehicleData = vehicles.find(v => v.id === selectedVehicle);
+
+  const tourSteps: Step[] = [
+    {
+      target: 'body',
+      content: 'Bem-vindo ao Fleet Tracker! Vou mostrar-te como usar a aplicação 🚗',
+      placement: 'center',
+    },
+    {
+      target: '[id="vehicle"]',
+      content: 'Aqui podes escolher o veículo que vais usar para a tua viagem',
+    },
+    {
+      target: '[id="destination"]',
+      content: 'Preenche o destino da viagem',
+    },
+    {
+      target: '[id="start_mileage"]',
+      content: 'Insere a quilometragem inicial do veículo',
+    },
+    {
+      target: '.menu-dropdown',
+      content: 'Acede aqui às reservas, rankings, histórico e observações',
+    },
+    {
+      target: '.start-trip-button',
+      content: 'Quando estiveres pronto, clica aqui para começar a viagem!',
+    },
+  ];
 
   useEffect(() => {
     if (!user) {
@@ -49,7 +81,12 @@ const StartTrip = () => {
           }
         });
     }
-  }, [user, navigate, searchParams]);
+
+    // Check if user needs onboarding tour
+    if (profile && !profile.has_completed_tour) {
+      setTimeout(() => setRunTour(true), 1000);
+    }
+  }, [user, navigate, searchParams, profile]);
 
   const fetchVehicles = async () => {
     const { data } = await supabase
@@ -124,6 +161,20 @@ const StartTrip = () => {
     }
   };
 
+  const handleTourFinish = async () => {
+    setRunTour(false);
+    if (user) {
+      await supabase
+        .from('profiles')
+        .update({ has_completed_tour: true })
+        .eq('id', user.id);
+    }
+  };
+
+  const restartTour = () => {
+    setRunTour(true);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card">
@@ -137,7 +188,7 @@ const StartTrip = () => {
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="menu-dropdown">
                   <Menu className="mr-2 h-4 w-4" />
                   Menu
                 </Button>
@@ -163,8 +214,14 @@ const StartTrip = () => {
                   <FileText className="mr-2 h-4 w-4" />
                   Observações
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={restartTour}>
+                  <BookOpen className="mr-2 h-4 w-4" />
+                  Rever Tour
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+
+            <ThemeToggle />
             
             <Button variant="outline" size="sm" onClick={signOut}>
               <LogOut className="mr-2 h-4 w-4" />
@@ -243,7 +300,7 @@ const StartTrip = () => {
               </div>
 
               <div className="flex flex-col gap-3">
-                <Button type="submit" className="w-full" disabled={loading}>
+                <Button type="submit" className="w-full start-trip-button" disabled={loading}>
                   {loading ? 'A iniciar viagem...' : 'Iniciar Viagem'}
                 </Button>
                 <div className="flex gap-3">
@@ -270,6 +327,8 @@ const StartTrip = () => {
           </CardContent>
         </Card>
       </main>
+
+      <OnboardingTour run={runTour} steps={tourSteps} onFinish={handleTourFinish} />
     </div>
   );
 };
